@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://platform.acme.example/schemas/team.schema.json",
+  "title": "Team infrastructure declaration",
+  "description": "One file per team at teams/<team>/team.yaml. Mirrors the validation rules of modules/team-baseline.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["team", "owner", "cost_center", "buckets"],
+  "properties": {
+    "team": {
+      "description": "Must equal the directory name. 3-24 lowercase letters/digits, no hyphens.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]{2,23}$"
+    },
+    "owner": {
+      "description": "Team distribution list (Owner tag).",
+      "type": "string",
+      "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+    },
+    "cost_center": {
+      "description": "Cost centre for chargeback (CostCenter tag).",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9-]{2,32}$"
+    },
+    "buckets": {
+      "description": "Buckets keyed by short name; the key becomes part of the bucket name.",
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 50,
+      "propertyNames": {
+        "pattern": "^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["visibility"],
+        "properties": {
+          "visibility": {
+            "description": "Required, no default. Public buckets require platform/security approval before apply.",
+            "enum": ["public", "private"]
+          },
+          "retention_days": {
+            "description": "Optional S3 Object Lock Compliance retention for each new object version; defaults to 90 days.",
+            "type": "integer",
+            "default": 90,
+            "minimum": 1,
+            "maximum": 36500
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+version: 0.2
+
+env:
+  variables:
+    TFLINT_VERSION: "0.55.1"
+    TRIVY_VERSION: "0.58.2"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - curl -fsSLo /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
+      - unzip -oq /tmp/terraform.zip -d /usr/local/bin
+      - curl -fsSLo /tmp/tflint.zip "https://github.com/terraform-linters/tflint/releases/download/v${TFLINT_VERSION}/tflint_linux_amd64.zip"
+      - unzip -oq /tmp/tflint.zip tflint -d /usr/local/bin
+      - curl -fsSLo /tmp/trivy.tar.gz "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+      - tar -xzf /tmp/trivy.tar.gz -C /tmp trivy
+      - mv /tmp/trivy /usr/local/bin/trivy
+      - pip3 install check-jsonschema
+  build:
+    commands:
+      - terraform fmt -check -recursive
+      - tflint --init
+      - tflint --recursive --config "$CODEBUILD_SRC_DIR/.tflint.hcl"
+      - trivy config --severity HIGH,CRITICAL --exit-code 1 --ignorefile .trivyignore modules/team-baseline
+      - check-jsonschema --check-metaschema schema/team.schema.json
+      - check-jsonschema --schemafile schema/team.schema.json teams/_template/team.yaml stack/tests/fixtures/valid.yaml
+      - '! check-jsonschema --schemafile schema/team.schema.json stack/tests/fixtures/missing-visibility.yaml'
+      - cd modules/team-baseline && terraform init -backend=false -input=false && terraform test -test-directory=tests/unit
+      - cd "$CODEBUILD_SRC_DIR/stack" && terraform init -backend=false -input=false && terraform test

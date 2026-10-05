@@ -1,0 +1,7 @@
+# Public read access is an explicit, label-gated choice (visibility: public).
+AVD-AWS-0087
+AVD-AWS-0093
+# Customer-managed KMS is out of scope for v1; SSE-S3 (AES256) is enforced on every bucket.
+AVD-AWS-0132
+# Access logging is centralised at the account level (CloudTrail data events), not per bucket.
+AVD-AWS-0089

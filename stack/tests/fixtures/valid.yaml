@@ -1,0 +1,10 @@
+team: fixture
+owner: fixture@acme.example
+cost_center: CC-0000
+buckets:
+  reports:
+    visibility: private
+    retention_days: 365
+  website:
+    visibility: public
+    retention_days: 365

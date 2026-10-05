@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../../schema/team.schema.json
+team: payments
+owner: payments-team@acme.example
+cost_center: CC-1001
+buckets:
+  invoices:
+    visibility: private
+    retention_days: 365
+  settlement-reports:
+    visibility: private
+    retention_days: 365
+  public-assets:
+    visibility: public
+    retention_days: 365

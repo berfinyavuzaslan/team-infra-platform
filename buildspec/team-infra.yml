@@ -1,0 +1,11 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - curl -fsSLo /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
+      - unzip -oq /tmp/terraform.zip -d /usr/local/bin
+      - pip3 install check-jsonschema
+  build:
+    commands:
+      - bash scripts/codebuild-team-infra.sh "$MODE"
