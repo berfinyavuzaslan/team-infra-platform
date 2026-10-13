@@ -12,8 +12,8 @@ mock_provider "aws" {
 
 variables {
   team_name   = "payments"
-  name_prefix = "acme"
-  owner_email = "payments@acme.example"
+  name_prefix = "sumup"
+  owner_email = "payments@sumup.example"
   cost_center = "CC-1001"
   buckets = {
     invoices      = { visibility = "private", retention_days = 365 }
@@ -25,15 +25,15 @@ run "bucket_names_follow_convention" {
   command = plan
 
   assert {
-    condition     = aws_s3_bucket.this["invoices"].bucket == "acme-payments-invoices"
+    condition     = aws_s3_bucket.this["invoices"].bucket == "sumup-payments-invoices"
     error_message = "Bucket name must be <prefix>-<team>-<key>."
   }
   assert {
-    condition     = aws_s3_bucket.this["public-assets"].bucket == "acme-payments-public-assets"
+    condition     = aws_s3_bucket.this["public-assets"].bucket == "sumup-payments-public-assets"
     error_message = "Bucket name must be <prefix>-<team>-<key>."
   }
   assert {
-    condition     = aws_iam_role.this.name == "acme-team-payments" && aws_iam_role.this.path == "/teams/"
+    condition     = aws_iam_role.this.name == "sumup-team-payments" && aws_iam_role.this.path == "/teams/"
     error_message = "Role must be named <prefix>-team-<team> under /teams/."
   }
 }
@@ -118,10 +118,10 @@ run "role_policy_is_scoped_to_own_buckets" {
 
   assert {
     condition = toset(flatten([for s in jsondecode(aws_iam_role_policy.s3_access.policy).Statement : s.Resource])) == toset([
-      "arn:aws:s3:::acme-payments-invoices",
-      "arn:aws:s3:::acme-payments-public-assets",
-      "arn:aws:s3:::acme-payments-invoices/*",
-      "arn:aws:s3:::acme-payments-public-assets/*",
+      "arn:aws:s3:::sumup-payments-invoices",
+      "arn:aws:s3:::sumup-payments-public-assets",
+      "arn:aws:s3:::sumup-payments-invoices/*",
+      "arn:aws:s3:::sumup-payments-public-assets/*",
     ])
     error_message = "Role policy must reference exactly the team's own buckets, with no wildcards."
   }
@@ -169,7 +169,7 @@ run "ownership_tags_are_enforced" {
     error_message = "Callers must not be able to override the Team tag."
   }
   assert {
-    condition     = aws_s3_bucket.this["invoices"].tags["CostCenter"] == "CC-1001" && aws_s3_bucket.this["invoices"].tags["Owner"] == "payments@acme.example"
+    condition     = aws_s3_bucket.this["invoices"].tags["CostCenter"] == "CC-1001" && aws_s3_bucket.this["invoices"].tags["Owner"] == "payments@sumup.example"
     error_message = "Cost allocation tags must be applied."
   }
   assert {
@@ -191,8 +191,8 @@ run "outputs_contract" {
 
   assert {
     condition = output.buckets == {
-      invoices      = { name = "acme-payments-invoices", arn = "arn:aws:s3:::acme-payments-invoices", visibility = "private" }
-      public-assets = { name = "acme-payments-public-assets", arn = "arn:aws:s3:::acme-payments-public-assets", visibility = "public" }
+      invoices      = { name = "sumup-payments-invoices", arn = "arn:aws:s3:::sumup-payments-invoices", visibility = "private" }
+      public-assets = { name = "sumup-payments-public-assets", arn = "arn:aws:s3:::sumup-payments-public-assets", visibility = "public" }
     }
     error_message = "buckets output shape is a contract consumed by the stack and downstream tooling."
   }

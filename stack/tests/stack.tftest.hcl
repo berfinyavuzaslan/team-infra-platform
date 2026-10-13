@@ -24,13 +24,13 @@ run "team_file_is_mapped_to_module" {
   }
   assert {
     condition = output.buckets == {
-      reports = { name = "acme-fixture-reports", arn = "arn:aws:s3:::acme-fixture-reports", visibility = "private" }
-      website = { name = "acme-fixture-website", arn = "arn:aws:s3:::acme-fixture-website", visibility = "public" }
+      reports = { name = "sumup-fixture-reports", arn = "arn:aws:s3:::sumup-fixture-reports", visibility = "private" }
+      website = { name = "sumup-fixture-website", arn = "arn:aws:s3:::sumup-fixture-website", visibility = "public" }
     }
     error_message = "Buckets not mapped from the team file."
   }
   assert {
-    condition     = module.team.role_name == "acme-team-fixture"
+    condition     = module.team.role_name == "sumup-team-fixture"
     error_message = "Role not created for the team."
   }
 }

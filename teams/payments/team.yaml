@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=../../schema/team.schema.json
 team: payments
-owner: payments-team@acme.example
+owner: payments-team@sumup.example
 cost_center: CC-1001
 buckets:
   invoices:

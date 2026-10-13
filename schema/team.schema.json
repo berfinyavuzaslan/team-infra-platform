@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://platform.acme.example/schemas/team.schema.json",
+  "$id": "https://platform.sumup.example/schemas/team.schema.json",
   "title": "Team infrastructure declaration",
   "description": "One file per team at teams/<team>/team.yaml. Mirrors the validation rules of modules/team-baseline.",
   "type": "object",

@@ -1,5 +1,5 @@
 team: fixture
-owner: fixture@acme.example
+owner: fixture@sumup.example
 cost_center: CC-0000
 buckets:
   reports:

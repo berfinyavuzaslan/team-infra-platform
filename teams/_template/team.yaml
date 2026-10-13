@@ -2,7 +2,7 @@
 #
 # Copy this directory to teams/<your-team>/ and edit. See README.md "Onboarding".
 team: myteam
-owner: myteam@acme.example
+owner: myteam@sumup.example
 cost_center: CC-0000
 buckets:
   data:

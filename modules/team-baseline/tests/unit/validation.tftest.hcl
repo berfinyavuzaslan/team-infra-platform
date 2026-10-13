@@ -12,8 +12,8 @@ mock_provider "aws" {
 
 variables {
   team_name   = "payments"
-  name_prefix = "acme"
-  owner_email = "payments@acme.example"
+  name_prefix = "sumup"
+  owner_email = "payments@sumup.example"
   cost_center = "CC-1001"
   buckets     = { invoices = { visibility = "private", retention_days = 365 } }
 }
@@ -69,7 +69,7 @@ run "team_name_must_not_contain_hyphens" {
 run "bucket_name_length_enforced" {
   command = plan
   variables {
-    name_prefix = "acmeplatform"
+    name_prefix = "sumupplatfrm"
     team_name   = "averyverylongteamname123"
     buckets     = { a-very-long-bucket-key-name-here = { visibility = "private", retention_days = 365 } }
   }

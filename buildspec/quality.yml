@@ -3,7 +3,7 @@ version: 0.2
 env:
   variables:
     TFLINT_VERSION: "0.55.1"
-    TRIVY_VERSION: "0.58.2"
+    TRIVY_VERSION: "0.75.0"
 
 phases:
   install:
