@@ -1,17 +1,18 @@
 # One-time platform bootstrap (applied by platform admins, own local/remote state).
-# Creates: state and artifact buckets, CodePipeline/CodeBuild roles, and team permissions boundary.
+# Uses the existing state bucket and creates the artifact bucket, CI roles, and team permissions boundary.
 
 # --- State bucket ----------------------------------------------------------------
 
-resource "aws_s3_bucket" "state" {
-  bucket = local.state_bucket
+removed {
+  from = aws_s3_bucket.state
+
   lifecycle {
-    prevent_destroy = true
+    destroy = false
   }
 }
 
 resource "aws_s3_bucket_public_access_block" "state" {
-  bucket                  = aws_s3_bucket.state.id
+  bucket                  = data.aws_s3_bucket.state.id
   block_public_acls       = true
   ignore_public_acls      = true
   block_public_policy     = true
@@ -20,14 +21,14 @@ resource "aws_s3_bucket_public_access_block" "state" {
 
 # Versioning = point-in-time recovery of any team's state, and audit trail after offboarding.
 resource "aws_s3_bucket_versioning" "state" {
-  bucket = aws_s3_bucket.state.id
+  bucket = data.aws_s3_bucket.state.id
   versioning_configuration {
     status = "Enabled"
   }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
-  bucket = aws_s3_bucket.state.id
+  bucket = data.aws_s3_bucket.state.id
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "aws:kms"
@@ -37,7 +38,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
 }
 
 resource "aws_s3_bucket_policy" "state" {
-  bucket = aws_s3_bucket.state.id
+  bucket = data.aws_s3_bucket.state.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -101,7 +102,7 @@ resource "aws_iam_role_policy" "plan" {
         Sid      = "CloneConnectedRepository"
         Effect   = "Allow"
         Action   = ["codestar-connections:UseConnection", "codeconnections:UseConnection"]
-        Resource = var.codestar_connection_arn
+        Resource = aws_codestarconnections_connection.github.arn
       },
       {
         Sid      = "ReadPipelineArtifacts"
@@ -136,7 +137,7 @@ resource "aws_iam_role_policy" "apply" {
         Sid      = "CloneConnectedRepository"
         Effect   = "Allow"
         Action   = ["codestar-connections:UseConnection", "codeconnections:UseConnection"]
-        Resource = var.codestar_connection_arn
+        Resource = aws_codestarconnections_connection.github.arn
       },
       {
         Sid      = "ReadPipelineArtifacts"

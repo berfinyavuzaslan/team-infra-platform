@@ -14,6 +14,14 @@ resource "aws_s3_bucket_public_access_block" "artifacts" {
   restrict_public_buckets = true
 }
 
+resource "aws_s3_bucket_versioning" "artifacts" {
+  bucket = aws_s3_bucket.artifacts.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 resource "aws_s3_bucket_server_side_encryption_configuration" "artifacts" {
   bucket = aws_s3_bucket.artifacts.id
 
@@ -22,6 +30,11 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "artifacts" {
       sse_algorithm = "AES256"
     }
   }
+}
+
+resource "aws_codestarconnections_connection" "github" {
+  name          = "${var.name_prefix}-team-infra-github"
+  provider_type = "GitHub"
 }
 
 resource "aws_s3_bucket_policy" "artifacts" {
@@ -69,7 +82,7 @@ resource "aws_iam_role_policy" "pipeline" {
         Sid      = "UseGitHubConnection"
         Effect   = "Allow"
         Action   = ["codestar-connections:UseConnection", "codeconnections:UseConnection"]
-        Resource = var.codestar_connection_arn
+        Resource = aws_codestarconnections_connection.github.arn
       },
       {
         Sid      = "RunBuildProjects"
@@ -215,7 +228,7 @@ resource "aws_codepipeline" "plan" {
       version          = "1"
       output_artifacts = ["SourceOutput"]
       configuration = {
-        ConnectionArn        = var.codestar_connection_arn
+        ConnectionArn        = aws_codestarconnections_connection.github.arn
         FullRepositoryId     = var.github_repository
         BranchName           = "main"
         DetectChanges        = "false"
@@ -285,7 +298,7 @@ resource "aws_codepipeline" "apply" {
       version          = "1"
       output_artifacts = ["SourceOutput"]
       configuration = {
-        ConnectionArn        = var.codestar_connection_arn
+        ConnectionArn        = aws_codestarconnections_connection.github.arn
         FullRepositoryId     = var.github_repository
         BranchName           = "main"
         DetectChanges        = "false"

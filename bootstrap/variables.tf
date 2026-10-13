@@ -1,22 +1,23 @@
 variable "aws_region" {
   type    = string
-  default = "eu-central-1"
+  default = "eu-north-1"
+}
+
+variable "state_bucket_name" {
+  description = "S3 bucket used for team and bootstrap Terraform state."
+  type        = string
+  default     = "sumup-team-infrastructure-assessment"
 }
 
 variable "name_prefix" {
   type    = string
-  default = "acme"
+  default = "sumup"
 }
 
 variable "github_repository" {
   description = "GitHub owner/repository connected to CodePipeline."
   type        = string
-  default     = "acme/team-infra"
-}
-
-variable "codestar_connection_arn" {
-  description = "An active CodeStar connection ARN authorized for github_repository."
-  type        = string
+  default     = "berfinyavuzaslan/team-infra-platform"
 }
 
 variable "team_parallelism" {
