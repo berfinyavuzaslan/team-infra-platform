@@ -9,6 +9,3 @@ buckets:
   settlement-reports:
     visibility: private
     retention_days: 365
-  public-assets:
-    visibility: public
-    retention_days: 365
