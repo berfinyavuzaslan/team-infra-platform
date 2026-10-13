@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=../../schema/team.schema.json
 team: ledger
-owner: ledger-team@acme.example
+owner: ledger-team@sumup.example
 cost_center: CC-2040
 buckets:
   journal-exports:
-    visibility: private
+    visibility: public
     retention_days: 365

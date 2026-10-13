@@ -22,8 +22,8 @@ run "apply_module" {
 
   variables {
     team_name   = "it${run.setup.suffix}"
-    name_prefix = "acmeit"
-    owner_email = "platform@acme.example"
+    name_prefix = "sumupit"
+    owner_email = "platform@sumup.example"
     cost_center = "CC-PLATFORM"
     # Test-only cleanup mode omits default retention so Terraform can destroy its probe objects.
     force_destroy = true
@@ -34,7 +34,7 @@ run "apply_module" {
   }
 
   assert {
-    condition     = output.buckets["private-data"].name == "acmeit-it${run.setup.suffix}-private-data"
+    condition     = output.buckets["private-data"].name == "sumupit-it${run.setup.suffix}-private-data"
     error_message = "Unexpected bucket name."
   }
   assert {

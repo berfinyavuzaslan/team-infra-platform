@@ -2,7 +2,7 @@ locals {
   account_id = data.aws_caller_identity.current.account_id
   partition  = data.aws_partition.current.partition
   # Deliberately does NOT match the "<prefix>-*" pattern granted to CI for team buckets.
-  state_bucket     = "tfstate-${var.name_prefix}-teams-${local.account_id}"
+  state_bucket     = var.state_bucket_name
   state_bucket_arn = "arn:${local.partition}:s3:::${local.state_bucket}"
   team_buckets_arn = "arn:${local.partition}:s3:::${var.name_prefix}-*"
   team_roles_arn   = "arn:${local.partition}:iam::${local.account_id}:role/teams/*"

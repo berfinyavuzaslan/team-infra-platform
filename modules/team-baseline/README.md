@@ -7,8 +7,8 @@ module "team" {
   source = "../modules/team-baseline"
 
   team_name              = "payments"
-  name_prefix            = "acme"
-  owner_email            = "payments-team@acme.example"
+  name_prefix            = "sumup"
+  owner_email            = "payments-team@sumup.example"
   cost_center            = "CC-1001"
   buckets = {
     invoices      = { visibility = "private" }

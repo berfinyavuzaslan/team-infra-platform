@@ -12,17 +12,17 @@ variable "team_file" {
 variable "aws_region" {
   description = "Region for all team resources."
   type        = string
-  default     = "eu-central-1"
+  default     = "eu-north-1"
 }
 
 variable "name_prefix" {
   description = "Organisation prefix for resource names."
   type        = string
-  default     = "acme"
+  default     = "sumup"
 }
 
 variable "repository" {
   description = "Source repository, recorded as a tag for traceability."
   type        = string
-  default     = "acme/team-infra"
+  default     = "berfinyavuzaslan/team-infra-platform"
 }

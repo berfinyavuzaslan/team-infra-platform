@@ -48,7 +48,7 @@ flowchart LR
    ```yaml
    # yaml-language-server: $schema=../../schema/team.schema.json
    team: payments                      # must equal the directory name
-   owner: payments-team@acme.example   # Owner tag
+   owner: payments-team@sumup.example   # Owner tag
    cost_center: CC-1001                # CostCenter tag
    buckets:
      invoices:
@@ -57,9 +57,9 @@ flowchart LR
        visibility: public              # requires platform/security approval before apply
        retention_days: 365             # optional Compliance retention override
    ```
-3. Add `/teams/<team>/ @acme/<github-team>` to `.github/CODEOWNERS`.
+3. Add `/teams/<team>/ @sumup/<github-team>` to `.github/CODEOWNERS`.
 4. Open a PR and review the plan in the CodeBuild logs linked from the CodePipeline execution.
-5. After merge, the apply pipeline waits for platform approval, then provisions the `acme-team-<team>` role and buckets named `acme-<team>-<bucket>`.
+5. After merge, the apply pipeline waits for platform approval, then provisions the `sumup-team-<team>` role and buckets named `sumup-<team>-<bucket>`.
 
 Platform reviews the first PR because it touches CODEOWNERS. After that, only the team's own reviewers approve changes to its file.
 
@@ -85,12 +85,12 @@ scripts/tf.sh payments plan
 - **Retention defaults to 90 days.** Teams may optionally set `retention_days` from 1 to 36,500 for a different S3 Object Lock Compliance period. It applies to new object versions and cannot be shortened or bypassed.
 
 ### Naming convention (enforced by the module)
-`<prefix>-<team>-<bucket>`, for example `acme-payments-invoices`. Team names **can't contain hyphens**, which makes every name parse unambiguously. Without that rule, team `pay` with bucket `eu-data` and team `pay-eu` with bucket `data` would both produce `acme-pay-eu-data`. The role is `acme-team-<team>` under the IAM path `/teams/`.
+`<prefix>-<team>-<bucket>`, for example `sumup-payments-invoices`. Team names **can't contain hyphens**, which makes every name parse unambiguously. Without that rule, team `pay` with bucket `eu-data` and team `pay-eu` with bucket `data` would both produce `sumup-pay-eu-data`. The role is `sumup-team-<team>` under the IAM path `/teams/`.
 
 ### Security
 | Concern | How it is handled |
 |---|---|
-| Team role scope | Explicit ARNs of the team's own buckets only. There are **no wildcards**, because `acme-pay-*` would also match other teams. |
+| Team role scope | Explicit ARNs of the team's own buckets only. There are **no wildcards**, because `sumup-pay-*` would also match other teams. |
 | Name squatting / foreign buckets | Every statement has the condition `s3:ResourceAccount = <our account>`. |
 | Least privilege | Object read/write and list only. No bucket-config changes, no ACLs, and no `DeleteObjectVersion` or `PutObjectRetention`, so teams cannot purge versions or override configured retention. |
 | Trust | Each team role trusts identities in the deployment account. Callers also need an identity-based `sts:AssumeRole` permission. The role's S3 policy remains scoped to that team's buckets. Cross-account trust is not allowed. |
@@ -108,10 +108,10 @@ scripts/tf.sh payments plan
 Every team has its **own state object** in a shared, versioned, encrypted bucket:
 
 ```
-s3://tfstate-acme-teams-<account>/teams/<team>/terraform.tfstate
+s3://sumup-team-infrastructure-assessment/teams/<team>/terraform.tfstate
 ```
 
-`stack/backend.hcl` holds the shared settings. `scripts/tf.sh` adds `key=teams/<team>/terraform.tfstate` at `init` and gives each team its own `TF_DATA_DIR`. Locking uses S3-native lockfiles (`use_lockfile`), so no DynamoDB table is needed.
+`stack/backend.hcl` holds the shared settings. `scripts/tf.sh` adds `key=teams/<team>/terraform.tfstate` at `init` and gives each team its own `TF_DATA_DIR`. The bootstrap pipeline state uses the separate `bootstrap/terraform.tfstate` key in the same bucket. Locking uses S3-native lockfiles (`use_lockfile`), so no DynamoDB table is needed.
 
 Why this approach:
 - **Blast radius.** A bad file or a failed apply affects one team. Team A's plan can't touch team B's resources because they aren't in team A's state.
@@ -180,13 +180,16 @@ Ownership tags are merged **last**, so callers can't override them. Activate `Te
 
 ## Bootstrap (once, by platform admins)
 
+The shared state bucket (`sumup-team-infrastructure-assessment`) must already exist in the AWS account and `eu-north-1`; bootstrap uses it but does not create or delete it. Bootstrap manages its versioning, encryption, public-access block, and TLS-only policy. Start with local bootstrap state, then migrate it to S3 after the apply:
+
 ```bash
-cd bootstrap && terraform init && terraform apply \
-  -var='github_repository=acme/team-infra' \
-  -var='codestar_connection_arn=arn:aws:codestar-connections:eu-central-1:111122223333:connection/connection-id'
+cd bootstrap
+terraform init -backend=false
+terraform apply -var='github_repository=berfinyavuzaslan/team-infra-platform'
+terraform init -migrate-state -backend-config=backend.hcl
 ```
 
-Create and authorize the CodeStar connection for the repository before applying bootstrap. Restrict `codepipeline:PutApprovalResult` to platform/security approvers. The plan pipeline is PR-triggered; the apply pipeline watches relevant `main` changes and uses queued execution.
+Bootstrap creates an AWS CodeConnections connection for GitHub. After the apply, open **Developer Tools → Settings → Connections** in the AWS console, select the new connection, and choose **Update pending connection** to authorize it with GitHub and grant access to `berfinyavuzaslan/team-infra-platform` (or the repository selected by `github_repository`). This manual GitHub authorization is required before source actions can run. Restrict `codepipeline:PutApprovalResult` to platform/security approvers. The plan pipeline is PR-triggered; the apply pipeline watches relevant `main` changes and uses queued execution.
 
 ## Limits and next steps
 - 50 buckets per team keeps the inline role policy well under IAM's 10 KB limit. For more, switch to a managed policy or to ABAC on the `Team` tag.

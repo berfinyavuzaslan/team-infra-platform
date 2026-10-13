@@ -1,7 +1,7 @@
 # Last matching rule wins. Platform owns everything by default...
-*                       @acme/platform-team
+*                       @sumup/platform-team
 
 # ...and each team owns (and alone approves changes to) its own declaration.
 # Onboarding PRs add one line here and are therefore reviewed once by the platform team.
-/teams/payments/        @acme/payments
-/teams/ledger/          @acme/ledger
+/teams/payments/        @sumup/payments
+/teams/ledger/          @sumup/ledger

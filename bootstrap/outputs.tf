@@ -1,5 +1,5 @@
 output "state_bucket" {
-  value = aws_s3_bucket.state.id
+  value = data.aws_s3_bucket.state.id
 }
 
 output "plan_role_arn" {
